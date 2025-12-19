@@ -1,4 +1,4 @@
-export type DataSourceType = 'Claims' | 'SP' | 'Labs' | 'EPR / EMR';
+export type DataSourceType = 'Claims' | 'Labs' | 'SP';
 
 export interface DataSourceOption {
   type: DataSourceType;
@@ -11,56 +11,106 @@ export interface SelectedSource {
   vendor: string | null;
 }
 
-export interface AttributeCoverage {
-  attribute: string;
-  claims: boolean;
-  emr: boolean;
-  labs: boolean;
-  sp: boolean;
-  weight: 'High' | 'Medium' | 'Optional Boost';
+export interface AttributeCoverageByVendor {
+  [vendorKey: string]: boolean;
 }
 
-export interface JourneyCapability {
-  component: string;
-  supported: 'Yes' | 'Partial' | 'No';
-  source: string;
+export interface AttributeCoverageItem {
+  attribute: string;
+  coverage: AttributeCoverageByVendor;
+  roleInMatching: 'High' | 'Medium';
 }
 
 export const DATA_SOURCE_OPTIONS: DataSourceOption[] = [
   {
     type: 'Claims',
-    vendors: ['Optum', 'IQVIA', 'Symphony', 'Merative', 'Komodo'],
-  },
-  {
-    type: 'SP',
-    vendors: ['Symphony', 'Komodo', 'IntegriChain', 'Veeva'],
+    vendors: ['IQVIA', 'Optum', 'Symphony'],
   },
   {
     type: 'Labs',
-    vendors: ['LabCorp', 'Quest', 'BioReference', 'Exact Sciences'],
+    vendors: ['LabCorp', 'Quest'],
   },
   {
-    type: 'EPR / EMR',
-    vendors: ['Epic', 'Cerner', 'Veradigm', 'Meditech', 'Athenahealth'],
+    type: 'SP',
+    vendors: ['Symphony', 'Komodo'],
   },
 ];
 
-export const ATTRIBUTE_COVERAGE_DATA: AttributeCoverage[] = [
-  { attribute: 'Patient Age', claims: true, emr: true, labs: true, sp: true, weight: 'Medium' },
-  { attribute: 'Patient Gender', claims: true, emr: true, labs: true, sp: true, weight: 'Medium' },
-  { attribute: 'ZIP / Geography', claims: true, emr: true, labs: false, sp: true, weight: 'High' },
-  { attribute: 'HCP Identifier', claims: true, emr: true, labs: true, sp: true, weight: 'High' },
-  { attribute: 'Diagnosis Codes', claims: true, emr: true, labs: false, sp: false, weight: 'Medium' },
-  { attribute: 'Drug Exposure', claims: true, emr: true, labs: false, sp: true, weight: 'Optional Boost' },
-  { attribute: 'Lab Results', claims: false, emr: true, labs: true, sp: false, weight: 'High' },
-  { attribute: 'Dates / Timeline', claims: true, emr: true, labs: true, sp: true, weight: 'High' },
-];
+// Attribute coverage data by vendor - defines which attributes are available for each vendor
+export const VENDOR_ATTRIBUTE_COVERAGE: Record<string, Record<string, boolean>> = {
+  // Claims vendors
+  'IQVIA': {
+    'Year of Birth': true,
+    'Gender': true,
+    'ZIP / State': true,
+    'NPI': true,
+    'ICD Diagnosis Code': true,
+    'NDC (Drug Code)': true,
+    'Procedure Code (CPT / HCPCS)': true,
+    'Event Date (Service / Order / Fill)': true,
+  },
+  'Optum': {
+    'Year of Birth': true,
+    'Gender': true,
+    'ZIP / State': true,
+    'NPI': true,
+    'ICD Diagnosis Code': true,
+    'NDC (Drug Code)': true,
+    'Procedure Code (CPT / HCPCS)': true,
+    'Event Date (Service / Order / Fill)': true,
+  },
+  'Symphony': {
+    'Year of Birth': true,
+    'Gender': true,
+    'ZIP / State': true,
+    'NPI': true,
+    'ICD Diagnosis Code': false,
+    'NDC (Drug Code)': true,
+    'Procedure Code (CPT / HCPCS)': false,
+    'Event Date (Service / Order / Fill)': true,
+  },
+  // Labs vendors
+  'LabCorp': {
+    'Year of Birth': true,
+    'Gender': true,
+    'ZIP / State': false,
+    'NPI': true,
+    'ICD Diagnosis Code': false,
+    'NDC (Drug Code)': false,
+    'Procedure Code (CPT / HCPCS)': true,
+    'Event Date (Service / Order / Fill)': true,
+  },
+  'Quest': {
+    'Year of Birth': true,
+    'Gender': true,
+    'ZIP / State': false,
+    'NPI': true,
+    'ICD Diagnosis Code': false,
+    'NDC (Drug Code)': false,
+    'Procedure Code (CPT / HCPCS)': true,
+    'Event Date (Service / Order / Fill)': true,
+  },
+  // SP vendors
+  'Komodo': {
+    'Year of Birth': true,
+    'Gender': true,
+    'ZIP / State': true,
+    'NPI': true,
+    'ICD Diagnosis Code': false,
+    'NDC (Drug Code)': true,
+    'Procedure Code (CPT / HCPCS)': false,
+    'Event Date (Service / Order / Fill)': true,
+  },
+};
 
-export const JOURNEY_CAPABILITY_DATA: JourneyCapability[] = [
-  { component: 'Diagnosis → Treatment Start', supported: 'Yes', source: 'Claims + EMR' },
-  { component: 'Switching Events', supported: 'Yes', source: 'Claims' },
-  { component: 'Persistence / Gaps', supported: 'Yes', source: 'Claims' },
-  { component: 'Lab-driven Milestones', supported: 'Partial', source: 'Labs + EMR' },
-  { component: 'Specialty Referral Flow', supported: 'Yes', source: 'Claims + EMR' },
-  { component: 'Adherence Proxy', supported: 'Yes', source: 'Claims' },
+// Attributes with their role in matching
+export const ATTRIBUTE_DEFINITIONS: { attribute: string; roleInMatching: 'High' | 'Medium' }[] = [
+  { attribute: 'Year of Birth', roleInMatching: 'High' },
+  { attribute: 'Gender', roleInMatching: 'High' },
+  { attribute: 'ZIP / State', roleInMatching: 'Medium' },
+  { attribute: 'NPI', roleInMatching: 'High' },
+  { attribute: 'ICD Diagnosis Code', roleInMatching: 'Medium' },
+  { attribute: 'NDC (Drug Code)', roleInMatching: 'Medium' },
+  { attribute: 'Procedure Code (CPT / HCPCS)', roleInMatching: 'Medium' },
+  { attribute: 'Event Date (Service / Order / Fill)', roleInMatching: 'High' },
 ];

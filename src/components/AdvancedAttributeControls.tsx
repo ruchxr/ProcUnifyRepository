@@ -1,13 +1,19 @@
 import { ChevronDown, Settings2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
-import { AttributeConfig } from '@/types/triangulation';
+import { AttributeConfig, AgeMatchingOption, GeographyOption, HcpOption, DrugOption, GenderOption } from '@/types/triangulation';
 import { useState } from 'react';
 
 interface AdvancedAttributeControlsProps {
@@ -15,7 +21,33 @@ interface AdvancedAttributeControlsProps {
   onAttributeChange: (id: string, updates: Partial<AttributeConfig>) => void;
 }
 
-const AGE_RANGES = [0, 2, 5, 10];
+const AGE_OPTIONS: { value: AgeMatchingOption; label: string }[] = [
+  { value: 'exact', label: 'Exact' },
+  { value: 'plus_minus_1', label: '±1 year' },
+  { value: 'plus_minus_2', label: '±2 years' },
+];
+
+const GEOGRAPHY_OPTIONS: { value: GeographyOption; label: string }[] = [
+  { value: 'zip3', label: 'ZIP3' },
+  { value: 'state', label: 'State' },
+];
+
+const HCP_OPTIONS: { value: HcpOption; label: string }[] = [
+  { value: 'exact_npi', label: 'Exact NPI' },
+  { value: 'specialty', label: 'Specialty' },
+  { value: 'hco', label: 'HCO (Health Care Organization)' },
+];
+
+const DRUG_OPTIONS: { value: DrugOption; label: string }[] = [
+  { value: 'exact_ndc', label: 'Exact NDC' },
+  { value: 'brand', label: 'Brand' },
+  { value: 'molecule', label: 'Molecule' },
+];
+
+const GENDER_OPTIONS: { value: GenderOption; label: string }[] = [
+  { value: 'exact', label: 'Exact match' },
+  { value: 'allow_unknown', label: 'Allow unknown' },
+];
 
 export function AdvancedAttributeControls({
   attributes,
@@ -23,9 +55,118 @@ export function AdvancedAttributeControls({
 }: AdvancedAttributeControlsProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const getAgeRangeIndex = (range: number) => {
-    const idx = AGE_RANGES.indexOf(range);
-    return idx >= 0 ? idx : 1;
+  const getOptionLabel = (attr: AttributeConfig): string => {
+    switch (attr.id) {
+      case 'age':
+        return AGE_OPTIONS.find(o => o.value === attr.ageOption)?.label || 'Exact';
+      case 'geography':
+        return GEOGRAPHY_OPTIONS.find(o => o.value === attr.geographyOption)?.label || 'ZIP3';
+      case 'hcp':
+        return HCP_OPTIONS.find(o => o.value === attr.hcpOption)?.label || 'Exact NPI';
+      case 'drug':
+        return DRUG_OPTIONS.find(o => o.value === attr.drugOption)?.label || 'Exact NDC';
+      case 'gender':
+        return GENDER_OPTIONS.find(o => o.value === attr.genderOption)?.label || 'Exact match';
+      default:
+        return '';
+    }
+  };
+
+  const renderAttributeControl = (attr: AttributeConfig) => {
+    switch (attr.id) {
+      case 'age':
+        return (
+          <Select
+            value={attr.ageOption}
+            onValueChange={(value) => onAttributeChange(attr.id, { ageOption: value as AgeMatchingOption })}
+          >
+            <SelectTrigger className="w-full bg-background">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border border-border shadow-elevated z-50">
+              {AGE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      case 'geography':
+        return (
+          <Select
+            value={attr.geographyOption}
+            onValueChange={(value) => onAttributeChange(attr.id, { geographyOption: value as GeographyOption })}
+          >
+            <SelectTrigger className="w-full bg-background">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border border-border shadow-elevated z-50">
+              {GEOGRAPHY_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      case 'hcp':
+        return (
+          <Select
+            value={attr.hcpOption}
+            onValueChange={(value) => onAttributeChange(attr.id, { hcpOption: value as HcpOption })}
+          >
+            <SelectTrigger className="w-full bg-background">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border border-border shadow-elevated z-50">
+              {HCP_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      case 'drug':
+        return (
+          <Select
+            value={attr.drugOption}
+            onValueChange={(value) => onAttributeChange(attr.id, { drugOption: value as DrugOption })}
+          >
+            <SelectTrigger className="w-full bg-background">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border border-border shadow-elevated z-50">
+              {DRUG_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      case 'gender':
+        return (
+          <Select
+            value={attr.genderOption}
+            onValueChange={(value) => onAttributeChange(attr.id, { genderOption: value as GenderOption })}
+          >
+            <SelectTrigger className="w-full bg-background">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border border-border shadow-elevated z-50">
+              {GENDER_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -53,7 +194,7 @@ export function AdvancedAttributeControls({
                   : 'bg-muted/30 border-transparent'
               )}
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <Switch
                     checked={attr.enabled}
@@ -72,71 +213,16 @@ export function AdvancedAttributeControls({
                 </div>
 
                 {attr.enabled && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">
-                      {attr.strictness === 'strict' ? attr.options.strict : attr.options.broad}
-                    </span>
-                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {getOptionLabel(attr)}
+                  </span>
                 )}
               </div>
 
               {/* Attribute-specific controls */}
               {attr.enabled && (
-                <div className="mt-4 pl-11">
-                  {attr.id === 'age' ? (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>±0 years</span>
-                        <span>±10 years</span>
-                      </div>
-                      <Slider
-                        value={[getAgeRangeIndex(attr.ageRange || 2)]}
-                        onValueChange={(values) => {
-                          const range = AGE_RANGES[values[0]];
-                          onAttributeChange(attr.id, {
-                            ageRange: range,
-                            strictness: range <= 2 ? 'strict' : 'broad',
-                          });
-                        }}
-                        max={AGE_RANGES.length - 1}
-                        step={1}
-                      />
-                      <div className="flex justify-center">
-                        <span className="text-sm font-medium text-foreground">
-                          ±{attr.ageRange || 2} years tolerance
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() =>
-                          onAttributeChange(attr.id, { strictness: 'strict' })
-                        }
-                        className={cn(
-                          'flex-1 px-3 py-2 text-xs font-medium rounded-md transition-all',
-                          attr.strictness === 'strict'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                        )}
-                      >
-                        {attr.options.strict}
-                      </button>
-                      <button
-                        onClick={() =>
-                          onAttributeChange(attr.id, { strictness: 'broad' })
-                        }
-                        className={cn(
-                          'flex-1 px-3 py-2 text-xs font-medium rounded-md transition-all',
-                          attr.strictness === 'broad'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                        )}
-                      >
-                        {attr.options.broad}
-                      </button>
-                    </div>
-                  )}
+                <div className="mt-4 pl-11 max-w-xs">
+                  {renderAttributeControl(attr)}
                 </div>
               )}
             </div>

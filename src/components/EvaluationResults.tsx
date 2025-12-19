@@ -2,11 +2,17 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AttributeCoverageTable } from './AttributeCoverageTable';
 import { PatientJourneyTable } from './PatientJourneyTable';
-import {
-  ATTRIBUTE_COVERAGE_DATA,
-  JOURNEY_CAPABILITY_DATA,
-  SelectedSource,
-} from '@/types/dataSource';
+import { SelectedSource } from '@/types/dataSource';
+
+// Journey capability data - defines what journey components are supported
+const JOURNEY_CAPABILITY_DATA = [
+  { component: 'Diagnosis → Treatment Start', supported: 'Yes' as const, source: 'Claims + Labs' },
+  { component: 'Switching Events', supported: 'Yes' as const, source: 'Claims' },
+  { component: 'Persistence / Gaps', supported: 'Yes' as const, source: 'Claims' },
+  { component: 'Lab-driven Milestones', supported: 'Partial' as const, source: 'Labs' },
+  { component: 'Specialty Referral Flow', supported: 'Yes' as const, source: 'Claims' },
+  { component: 'Adherence Proxy', supported: 'Yes' as const, source: 'Claims + SP' },
+];
 
 interface EvaluationResultsProps {
   selectedSources: SelectedSource[];
@@ -28,7 +34,7 @@ export function EvaluationResults({ selectedSources, onProceed }: EvaluationResu
         </div>
       </div>
 
-      <AttributeCoverageTable data={ATTRIBUTE_COVERAGE_DATA} selectedSources={selectedSources} />
+      <AttributeCoverageTable selectedSources={selectedSources} />
 
       <PatientJourneyTable data={JOURNEY_CAPABILITY_DATA} />
 

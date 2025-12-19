@@ -1,5 +1,5 @@
 import { Check, X } from 'lucide-react';
-import { AttributeCoverage, SelectedSource } from '@/types/dataSource';
+import { SelectedSource, VENDOR_ATTRIBUTE_COVERAGE, ATTRIBUTE_DEFINITIONS } from '@/types/dataSource';
 import {
   Table,
   TableBody,
@@ -9,41 +9,22 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 interface AttributeCoverageTableProps {
-  data: AttributeCoverage[];
   selectedSources: SelectedSource[];
 }
 
-export function AttributeCoverageTable({ data, selectedSources }: AttributeCoverageTableProps) {
-  const hasSourceType = (type: string) => {
-    return selectedSources.some((s) => {
-      if (type === 'emr') return s.type === 'EPR / EMR';
-      return s.type?.toLowerCase() === type.toLowerCase();
-    });
-  };
-
-  const hasClaims = hasSourceType('claims');
-  const hasEmr = hasSourceType('emr');
-  const hasLabs = hasSourceType('labs');
-  const hasSp = hasSourceType('sp');
+export function AttributeCoverageTable({ selectedSources }: AttributeCoverageTableProps) {
+  // Filter to only valid source-vendor pairs
+  const validSources = selectedSources.filter((s) => s.type && s.vendor);
 
   const getWeightBadgeVariant = (weight: string) => {
-    switch (weight) {
-      case 'High':
-        return 'default';
-      case 'Medium':
-        return 'secondary';
-      default:
-        return 'outline';
-    }
+    return weight === 'High' ? 'default' : 'secondary';
   };
 
-  const renderIndicator = (value: boolean, isActive: boolean) => {
-    if (!isActive) {
-      return <span className="text-muted-foreground/30">—</span>;
-    }
-    return value ? (
+  const renderIndicator = (available: boolean) => {
+    return available ? (
       <div className="flex justify-center">
         <div className="w-6 h-6 rounded-full bg-success/10 flex items-center justify-center">
           <Check className="h-4 w-4 text-success" />
@@ -58,6 +39,16 @@ export function AttributeCoverageTable({ data, selectedSources }: AttributeCover
     );
   };
 
+  const getVendorCoverage = (vendor: string, attribute: string): boolean => {
+    const vendorData = VENDOR_ATTRIBUTE_COVERAGE[vendor];
+    if (!vendorData) return false;
+    return vendorData[attribute] ?? false;
+  };
+
+  if (validSources.length === 0) {
+    return null;
+  }
+
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center gap-3">
@@ -67,48 +58,57 @@ export function AttributeCoverageTable({ data, selectedSources }: AttributeCover
         </h3>
       </div>
 
-      <div className="rounded-lg border border-border overflow-hidden shadow-card bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-secondary/50 hover:bg-secondary/50">
-              <TableHead className="font-semibold text-foreground">Attribute Category</TableHead>
-              <TableHead className={`text-center font-semibold ${hasClaims ? 'text-foreground' : 'text-muted-foreground/50'}`}>
-                Claims
-              </TableHead>
-              <TableHead className={`text-center font-semibold ${hasEmr ? 'text-foreground' : 'text-muted-foreground/50'}`}>
-                EMR/EHR
-              </TableHead>
-              <TableHead className={`text-center font-semibold ${hasLabs ? 'text-foreground' : 'text-muted-foreground/50'}`}>
-                Labs
-              </TableHead>
-              <TableHead className={`text-center font-semibold ${hasSp ? 'text-foreground' : 'text-muted-foreground/50'}`}>
-                SP
-              </TableHead>
-              <TableHead className="text-center font-semibold text-foreground">Weight in Matching</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((row, index) => (
-              <TableRow 
-                key={row.attribute}
-                className="hover:bg-muted/30 transition-colors"
-                style={{ animationDelay: `${index * 30}ms` }}
-              >
-                <TableCell className="font-medium text-foreground">{row.attribute}</TableCell>
-                <TableCell className="text-center">{renderIndicator(row.claims, hasClaims)}</TableCell>
-                <TableCell className="text-center">{renderIndicator(row.emr, hasEmr)}</TableCell>
-                <TableCell className="text-center">{renderIndicator(row.labs, hasLabs)}</TableCell>
-                <TableCell className="text-center">{renderIndicator(row.sp, hasSp)}</TableCell>
-                <TableCell className="text-center">
-                  <Badge variant={getWeightBadgeVariant(row.weight)} className="font-medium">
-                    {row.weight}
-                  </Badge>
-                </TableCell>
+      <ScrollArea className="w-full whitespace-nowrap rounded-lg border border-border">
+        <div className="rounded-lg overflow-hidden shadow-card bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-secondary/50 hover:bg-secondary/50">
+                <TableHead className="font-semibold text-foreground sticky left-0 bg-secondary/50 z-10 min-w-[180px]">
+                  Attribute
+                </TableHead>
+                {validSources.map((source) => (
+                  <TableHead 
+                    key={source.id} 
+                    className="text-center font-semibold text-foreground min-w-[140px]"
+                  >
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span>{source.vendor}</span>
+                      <span className="text-xs font-normal text-muted-foreground">({source.type})</span>
+                    </div>
+                  </TableHead>
+                ))}
+                <TableHead className="text-center font-semibold text-foreground min-w-[140px]">
+                  Role in Matching
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {ATTRIBUTE_DEFINITIONS.map((attr, index) => (
+                <TableRow 
+                  key={attr.attribute}
+                  className="hover:bg-muted/30 transition-colors"
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  <TableCell className="font-medium text-foreground sticky left-0 bg-card z-10">
+                    {attr.attribute}
+                  </TableCell>
+                  {validSources.map((source) => (
+                    <TableCell key={source.id} className="text-center">
+                      {renderIndicator(getVendorCoverage(source.vendor!, attr.attribute))}
+                    </TableCell>
+                  ))}
+                  <TableCell className="text-center">
+                    <Badge variant={getWeightBadgeVariant(attr.roleInMatching)} className="font-medium">
+                      {attr.roleInMatching}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   );
 }

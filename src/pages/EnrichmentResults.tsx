@@ -1,11 +1,19 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Users, Layers, Gauge, Activity, Clock, Download, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
+import { ConfidenceRecommendation } from '@/components/ConfidenceRecommendation';
+
+interface LocationState {
+  confidence?: number;
+}
 
 const EnrichmentResults = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as LocationState;
+  const confidence = state?.confidence ?? 0.80;
 
   const handleBack = () => {
     navigate('/triangulation');
@@ -92,14 +100,14 @@ const EnrichmentResults = () => {
                   </div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">Avg Match Confidence Score</p>
                   <div className="flex items-baseline gap-2">
-                    <p className="text-4xl font-bold text-foreground tracking-tight">0.82</p>
+                    <p className="text-4xl font-bold text-foreground tracking-tight">{confidence.toFixed(2)}</p>
                     <span className="text-sm font-medium text-success">High</span>
                   </div>
                   {/* Confidence Bar */}
                   <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-gradient-to-r from-accent to-success rounded-full transition-all duration-500"
-                      style={{ width: '82%' }}
+                      style={{ width: `${confidence * 100}%` }}
                     />
                   </div>
                   <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
@@ -108,6 +116,12 @@ const EnrichmentResults = () => {
                 </CardContent>
               </Card>
             </div>
+          </section>
+
+          {/* Matching Confidence Recommendation */}
+          <section>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Matching Confidence Recommendation</h3>
+            <ConfidenceRecommendation confidence={confidence} />
           </section>
 
           {/* Section 2: Before vs After Enrichment Cards */}

@@ -1,5 +1,4 @@
 import { Check, AlertCircle, X } from 'lucide-react';
-import { JourneyCapability } from '@/types/dataSource';
 import {
   Table,
   TableBody,
@@ -8,6 +7,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+export interface JourneyCapability {
+  component: string;
+  supported: 'Yes' | 'Partial' | 'No';
+  source: string;
+}
 
 interface PatientJourneyTableProps {
   data: JourneyCapability[];
