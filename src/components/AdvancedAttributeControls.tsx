@@ -1,13 +1,6 @@
 import { ChevronDown, Settings2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -29,13 +22,13 @@ const AGE_OPTIONS: { value: AgeMatchingOption; label: string }[] = [
 
 const GEOGRAPHY_OPTIONS: { value: GeographyOption; label: string }[] = [
   { value: 'zip3', label: 'ZIP3' },
-  { value: 'state', label: 'State' },
+  { value: 'state', label: 'State / Region' },
 ];
 
 const HCP_OPTIONS: { value: HcpOption; label: string }[] = [
-  { value: 'exact_npi', label: 'Exact NPI' },
-  { value: 'specialty', label: 'Specialty' },
-  { value: 'hco', label: 'HCO (Health Care Organization)' },
+  { value: 'exact_npi', label: 'Exact NPI Match' },
+  { value: 'specialty', label: 'Specialty + Practice Match' },
+  { value: 'hco', label: 'HCO Match' },
 ];
 
 const DRUG_OPTIONS: { value: DrugOption; label: string }[] = [
@@ -45,9 +38,14 @@ const DRUG_OPTIONS: { value: DrugOption; label: string }[] = [
 ];
 
 const GENDER_OPTIONS: { value: GenderOption; label: string }[] = [
-  { value: 'exact', label: 'Exact match' },
-  { value: 'allow_unknown', label: 'Allow unknown' },
+  { value: 'exact', label: 'Exact match only' },
+  { value: 'allow_unknown', label: 'Allow unknown / missing' },
 ];
+
+interface AttributeOption {
+  value: string;
+  label: string;
+}
 
 export function AdvancedAttributeControls({
   attributes,
@@ -55,117 +53,63 @@ export function AdvancedAttributeControls({
 }: AdvancedAttributeControlsProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const getOptionLabel = (attr: AttributeConfig): string => {
+  const getOptionsForAttribute = (attr: AttributeConfig): AttributeOption[] => {
     switch (attr.id) {
       case 'age':
-        return AGE_OPTIONS.find(o => o.value === attr.ageOption)?.label || 'Exact';
+        return AGE_OPTIONS;
       case 'geography':
-        return GEOGRAPHY_OPTIONS.find(o => o.value === attr.geographyOption)?.label || 'ZIP3';
+        return GEOGRAPHY_OPTIONS;
       case 'hcp':
-        return HCP_OPTIONS.find(o => o.value === attr.hcpOption)?.label || 'Exact NPI';
+        return HCP_OPTIONS;
       case 'drug':
-        return DRUG_OPTIONS.find(o => o.value === attr.drugOption)?.label || 'Exact NDC';
+        return DRUG_OPTIONS;
       case 'gender':
-        return GENDER_OPTIONS.find(o => o.value === attr.genderOption)?.label || 'Exact match';
+        return GENDER_OPTIONS;
+      default:
+        return [];
+    }
+  };
+
+  const getCurrentValue = (attr: AttributeConfig): string => {
+    switch (attr.id) {
+      case 'age':
+        return attr.ageOption || 'exact';
+      case 'geography':
+        return attr.geographyOption || 'zip3';
+      case 'hcp':
+        return attr.hcpOption || 'exact_npi';
+      case 'drug':
+        return attr.drugOption || 'exact_ndc';
+      case 'gender':
+        return attr.genderOption || 'exact';
       default:
         return '';
     }
   };
 
-  const renderAttributeControl = (attr: AttributeConfig) => {
+  const getSelectedLabel = (attr: AttributeConfig): string => {
+    const options = getOptionsForAttribute(attr);
+    const currentValue = getCurrentValue(attr);
+    return options.find(o => o.value === currentValue)?.label || '';
+  };
+
+  const handleOptionSelect = (attr: AttributeConfig, value: string) => {
     switch (attr.id) {
       case 'age':
-        return (
-          <Select
-            value={attr.ageOption}
-            onValueChange={(value) => onAttributeChange(attr.id, { ageOption: value as AgeMatchingOption })}
-          >
-            <SelectTrigger className="w-full bg-background">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border border-border shadow-elevated z-50">
-              {AGE_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
+        onAttributeChange(attr.id, { ageOption: value as AgeMatchingOption });
+        break;
       case 'geography':
-        return (
-          <Select
-            value={attr.geographyOption}
-            onValueChange={(value) => onAttributeChange(attr.id, { geographyOption: value as GeographyOption })}
-          >
-            <SelectTrigger className="w-full bg-background">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border border-border shadow-elevated z-50">
-              {GEOGRAPHY_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
+        onAttributeChange(attr.id, { geographyOption: value as GeographyOption });
+        break;
       case 'hcp':
-        return (
-          <Select
-            value={attr.hcpOption}
-            onValueChange={(value) => onAttributeChange(attr.id, { hcpOption: value as HcpOption })}
-          >
-            <SelectTrigger className="w-full bg-background">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border border-border shadow-elevated z-50">
-              {HCP_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
+        onAttributeChange(attr.id, { hcpOption: value as HcpOption });
+        break;
       case 'drug':
-        return (
-          <Select
-            value={attr.drugOption}
-            onValueChange={(value) => onAttributeChange(attr.id, { drugOption: value as DrugOption })}
-          >
-            <SelectTrigger className="w-full bg-background">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border border-border shadow-elevated z-50">
-              {DRUG_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
+        onAttributeChange(attr.id, { drugOption: value as DrugOption });
+        break;
       case 'gender':
-        return (
-          <Select
-            value={attr.genderOption}
-            onValueChange={(value) => onAttributeChange(attr.id, { genderOption: value as GenderOption })}
-          >
-            <SelectTrigger className="w-full bg-background">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border border-border shadow-elevated z-50">
-              {GENDER_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
-      default:
-        return null;
+        onAttributeChange(attr.id, { genderOption: value as GenderOption });
+        break;
     }
   };
 
@@ -183,52 +127,71 @@ export function AdvancedAttributeControls({
       </CollapsibleTrigger>
 
       <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-        <div className="mt-4 space-y-3">
-          {attributes.map((attr) => (
-            <div
-              key={attr.id}
-              className={cn(
-                'p-4 rounded-lg border transition-all duration-200',
-                attr.enabled
-                  ? 'bg-card border-border'
-                  : 'bg-muted/30 border-transparent'
-              )}
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <Switch
-                    checked={attr.enabled}
-                    onCheckedChange={(checked) =>
-                      onAttributeChange(attr.id, { enabled: checked })
-                    }
-                  />
-                  <span
-                    className={cn(
-                      'font-medium transition-colors',
-                      attr.enabled ? 'text-foreground' : 'text-muted-foreground'
-                    )}
-                  >
-                    {attr.name}
-                  </span>
+        <div className="mt-4 space-y-4">
+          {attributes.map((attr) => {
+            const options = getOptionsForAttribute(attr);
+            const currentValue = getCurrentValue(attr);
+
+            return (
+              <div
+                key={attr.id}
+                className={cn(
+                  'p-4 rounded-lg border transition-all duration-200',
+                  attr.enabled
+                    ? 'bg-card border-border'
+                    : 'bg-muted/30 border-transparent opacity-60'
+                )}
+              >
+                {/* Header row with toggle, label, and selected value */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={attr.enabled}
+                      onCheckedChange={(checked) =>
+                        onAttributeChange(attr.id, { enabled: checked })
+                      }
+                    />
+                    <span
+                      className={cn(
+                        'font-medium transition-colors',
+                        attr.enabled ? 'text-foreground' : 'text-muted-foreground'
+                      )}
+                    >
+                      {attr.name}
+                    </span>
+                  </div>
+                  {attr.enabled && (
+                    <span className="text-sm text-muted-foreground">
+                      {getSelectedLabel(attr)}
+                    </span>
+                  )}
                 </div>
 
+                {/* Button options row */}
                 {attr.enabled && (
-                  <span className="text-xs text-muted-foreground">
-                    {getOptionLabel(attr)}
-                  </span>
+                  <div className="flex gap-2 flex-wrap">
+                    {options.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => handleOptionSelect(attr, option.value)}
+                        className={cn(
+                          'px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 border',
+                          currentValue === option.value
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-secondary/50 text-foreground border-border hover:bg-secondary hover:border-primary/50'
+                        )}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
-
-              {/* Attribute-specific controls */}
-              {attr.enabled && (
-                <div className="mt-4 pl-11 max-w-xs">
-                  {renderAttributeControl(attr)}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CollapsibleContent>
     </Collapsible>
   );
 }
+ 

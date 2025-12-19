@@ -4,14 +4,10 @@ import { AttributeCoverageTable } from './AttributeCoverageTable';
 import { PatientJourneyTable } from './PatientJourneyTable';
 import { SelectedSource } from '@/types/dataSource';
 
-// Journey capability data - defines what journey components are supported
 const JOURNEY_CAPABILITY_DATA = [
-  { component: 'Diagnosis → Treatment Start', supported: 'Yes' as const, source: 'Claims + Labs' },
-  { component: 'Switching Events', supported: 'Yes' as const, source: 'Claims' },
-  { component: 'Persistence / Gaps', supported: 'Yes' as const, source: 'Claims' },
-  { component: 'Lab-driven Milestones', supported: 'Partial' as const, source: 'Labs' },
-  { component: 'Specialty Referral Flow', supported: 'Yes' as const, source: 'Claims' },
-  { component: 'Adherence Proxy', supported: 'Yes' as const, source: 'Claims + SP' },
+  { component: 'Patient Journey Mapping', supported: 'Overall progression of patients across diagnosis, treatment, and follow-up stages' as const, source: 'Claims + Lab + SP' },
+  { component: 'Treatment Eligibility & Initiation', supported: 'Identify eligible patients and track start of therapy' as const, source: 'Claims + Lab + SP' },
+  { component: 'Lab-Driven Switching Signals', supported: 'Associate lab changes with subsequent treatment switches' as const, source: 'Claims + Claims' }
 ];
 
 interface EvaluationResultsProps {
@@ -36,7 +32,7 @@ export function EvaluationResults({ selectedSources, onProceed }: EvaluationResu
 
       <AttributeCoverageTable selectedSources={selectedSources} />
 
-      <PatientJourneyTable data={JOURNEY_CAPABILITY_DATA} />
+      <PatientJourneyTable data={JOURNEY_CAPABILITY_DATA}/>
 
       <div className="flex justify-end pt-4 border-t border-border">
         <Button
@@ -45,7 +41,7 @@ export function EvaluationResults({ selectedSources, onProceed }: EvaluationResu
           onClick={onProceed}
           className="gap-2"
         >
-          Proceed to Patient Triangulation
+          Proceed to Unification
           <ArrowRight className="h-5 w-5" />
         </Button>
       </div>

@@ -27,7 +27,7 @@ export function PatientJourneyTable({ data }: PatientJourneyTableProps) {
             <div className="w-6 h-6 rounded-full bg-success/10 flex items-center justify-center">
               <Check className="h-4 w-4 text-success" />
             </div>
-            <span className="text-success font-medium">Supported</span>
+            <span className="text-success font-medium">Description</span>
           </div>
         );
       case 'Partial':
@@ -56,7 +56,7 @@ export function PatientJourneyTable({ data }: PatientJourneyTableProps) {
       <div className="flex items-center gap-3">
         <div className="h-8 w-1 bg-accent rounded-full" />
         <h3 className="text-lg font-semibold text-foreground">
-          Supported Patient Journey Components
+          Cross-Source Analytics Use Cases
         </h3>
       </div>
 
@@ -64,9 +64,9 @@ export function PatientJourneyTable({ data }: PatientJourneyTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="bg-secondary/50 hover:bg-secondary/50">
-              <TableHead className="font-semibold text-foreground">Journey Component</TableHead>
-              <TableHead className="text-center font-semibold text-foreground">Supported?</TableHead>
-              <TableHead className="font-semibold text-foreground">Source</TableHead>
+              <TableHead className="font-semibold text-foreground text-center">Use Case</TableHead>
+              <TableHead className="font-semibold text-center text-foreground">Description</TableHead>
+              <TableHead className="font-semibold text-foreground text-center">Source</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -76,8 +76,8 @@ export function PatientJourneyTable({ data }: PatientJourneyTableProps) {
                 className="hover:bg-muted/30 transition-colors"
                 style={{ animationDelay: `${index * 30}ms` }}
               >
-                <TableCell className="font-medium text-foreground">{row.component}</TableCell>
-                <TableCell>{renderSupportedIndicator(row.supported)}</TableCell>
+                <TableCell className="font-medium text-foreground text-center">{row.component}</TableCell>
+                <TableCell className="font-medium text-center text-foreground">{row.supported}</TableCell>
                 <TableCell className="text-muted-foreground">{row.source}</TableCell>
               </TableRow>
             ))}

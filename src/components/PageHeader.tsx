@@ -7,15 +7,15 @@ export function PageHeader() {
       
       <div className="relative container mx-auto px-6 py-10">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-primary/20 rounded-xl backdrop-blur-sm border border-primary-foreground/10">
-            <Database className="h-8 w-8" />
+          <div className="p-3 bg-white rounded-xl backdrop-blur-sm border border-primary-foreground/10">
+            <img src='https://i.ibb.co/8JSnQ4D/proc-logo.png' className='w-20 h-15'></img>
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Patient Triangulation Engine
+              ProcUnify
             </h1>
             <p className="text-primary-foreground/70 mt-1">
-              Configure data sources for patient matching
+              From Fragmented to Unified: Smarter Patient Identification
             </p>
           </div>
         </div>

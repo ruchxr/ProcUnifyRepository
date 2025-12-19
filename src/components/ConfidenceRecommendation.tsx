@@ -2,32 +2,32 @@ import { Lightbulb, AlertCircle, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConfidenceRecommendationProps {
-  confidence: number;
+  confidence: number; // Now expects percentage (65-100)
 }
 
 export function ConfidenceRecommendation({ confidence }: ConfidenceRecommendationProps) {
   const getRecommendation = () => {
-    if (confidence >= 0.90) {
+    if (confidence >= 95) {
       return {
         icon: AlertCircle,
         title: 'Very Strict Threshold Selected',
-        message: 'You selected a very strict confidence threshold. Reducing confidence to 0.80 may significantly increase patient coverage and longitudinal depth while maintaining strong reliability.',
+        message: "You've selected a very strict confidence threshold. While accuracy is maximized, reducing confidence to 80% may significantly increase patient coverage and longitudinal depth without materially impacting reliability.",
         variant: 'warning' as const,
       };
     }
-    if (confidence >= 0.75 && confidence <= 0.85) {
+    if (confidence >= 75 && confidence <= 85) {
       return {
         icon: CheckCircle,
         title: 'Optimal Configuration',
-        message: 'Your selected confidence level provides a strong balance between accuracy and data enrichment and is suitable for most analyses.',
+        message: 'Your selected confidence level offers a strong balance between match reliability and data enrichment and is well suited for most analytical use cases.',
         variant: 'success' as const,
       };
     }
-    if (confidence <= 0.70) {
+    if (confidence <= 70) {
       return {
         icon: Lightbulb,
         title: 'Broader Threshold Selected',
-        message: 'You selected a broader confidence threshold. Increasing confidence toward 0.80 can improve match reliability and reduce ambiguity in downstream analyses.',
+        message: 'Your confidence setting favors broader inclusion. Increasing confidence toward 80% can improve match reliability while preserving most enrichment benefits.',
         variant: 'info' as const,
       };
     }
@@ -74,3 +74,4 @@ export function ConfidenceRecommendation({ confidence }: ConfidenceRecommendatio
     </div>
   );
 }
+ 

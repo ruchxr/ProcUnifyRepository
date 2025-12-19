@@ -1,4 +1,4 @@
-export type DataSourceType = 'Claims' | 'Labs' | 'SP';
+export type DataSourceType = 'Claims' | 'Lab' | 'SP';
 
 export interface DataSourceOption {
   type: DataSourceType;
@@ -24,21 +24,19 @@ export interface AttributeCoverageItem {
 export const DATA_SOURCE_OPTIONS: DataSourceOption[] = [
   {
     type: 'Claims',
-    vendors: ['IQVIA', 'Optum', 'Symphony'],
+    vendors: ['IQVIA', 'Komodo', 'Kythera', 'MMIT', 'Symphony', 'Veeva']
   },
   {
-    type: 'Labs',
-    vendors: ['LabCorp', 'Quest'],
+    type: 'Lab',
+    vendors: ['MMIT', 'Diaceutics'],
   },
   {
     type: 'SP',
-    vendors: ['Symphony', 'Komodo'],
+    vendors: ['PantherRx', 'Onco360']
   },
 ];
 
-// Attribute coverage data by vendor - defines which attributes are available for each vendor
 export const VENDOR_ATTRIBUTE_COVERAGE: Record<string, Record<string, boolean>> = {
-  // Claims vendors
   'IQVIA': {
     'Year of Birth': true,
     'Gender': true,
@@ -64,20 +62,29 @@ export const VENDOR_ATTRIBUTE_COVERAGE: Record<string, Record<string, boolean>> 
     'Gender': true,
     'ZIP / State': true,
     'NPI': true,
-    'ICD Diagnosis Code': false,
+    'ICD Diagnosis Code': true,
+    'NDC (Drug Code)': true,
+    'Procedure Code (CPT / HCPCS)': true,
+    'Event Date (Service / Order / Fill)': true,
+  },
+  'Onco360': {
+    'Year of Birth': true,
+    'Gender': true,
+    'ZIP / State': true,
+    'NPI': true,
+    'ICD Diagnosis Code': true,
     'NDC (Drug Code)': true,
     'Procedure Code (CPT / HCPCS)': false,
     'Event Date (Service / Order / Fill)': true,
   },
-  // Labs vendors
-  'LabCorp': {
+  'MMIT': {
     'Year of Birth': true,
     'Gender': true,
     'ZIP / State': false,
     'NPI': true,
-    'ICD Diagnosis Code': false,
+    'ICD Diagnosis Code': true,
     'NDC (Drug Code)': false,
-    'Procedure Code (CPT / HCPCS)': true,
+    'Procedure Code (CPT / HCPCS)': false,
     'Event Date (Service / Order / Fill)': true,
   },
   'Quest': {
@@ -90,13 +97,12 @@ export const VENDOR_ATTRIBUTE_COVERAGE: Record<string, Record<string, boolean>> 
     'Procedure Code (CPT / HCPCS)': true,
     'Event Date (Service / Order / Fill)': true,
   },
-  // SP vendors
   'Komodo': {
     'Year of Birth': true,
     'Gender': true,
     'ZIP / State': true,
     'NPI': true,
-    'ICD Diagnosis Code': false,
+    'ICD Diagnosis Code': true,
     'NDC (Drug Code)': true,
     'Procedure Code (CPT / HCPCS)': false,
     'Event Date (Service / Order / Fill)': true,

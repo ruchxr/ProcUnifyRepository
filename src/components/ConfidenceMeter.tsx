@@ -8,31 +8,31 @@ import {
 import { cn } from '@/lib/utils';
 
 interface ConfidenceMeterProps {
-  value: number; // 0.65 to 1.00
+  value: number; // 65 to 100 (percentage)
   onChange: (value: number) => void;
 }
 
 export function ConfidenceMeter({ value, onChange }: ConfidenceMeterProps) {
   const getConfidenceLabel = () => {
-    if (value <= 0.70) return 'Broader Matching';
-    if (value >= 0.95) return 'Very Strict';
-    if (value >= 0.78 && value <= 0.82) return 'Recommended';
+    if (value <= 70) return 'Broader Matching';
+    if (value >= 95) return 'Very Strict';
+    if (value >= 78 && value <= 82) return 'Recommended';
     return 'Balanced';
   };
 
   const getConfidenceColor = () => {
-    if (value <= 0.70) return 'text-warning';
-    if (value >= 0.95) return 'text-success';
+    if (value <= 70) return 'text-warning';
+    if (value >= 95) return 'text-success';
     return 'text-primary';
   };
 
-  // Convert slider value (0-100) to confidence (0.65-1.00) and vice versa
+  // Convert slider value (0-100) to confidence (65-100) and vice versa
   const sliderToConfidence = (sliderValue: number) => {
-    return 0.65 + (sliderValue / 100) * 0.35;
+    return 65 + (sliderValue / 100) * 35;
   };
 
   const confidenceToSlider = (confidence: number) => {
-    return ((confidence - 0.65) / 0.35) * 100;
+    return ((confidence - 65) / 35) * 100;
   };
 
   return (
@@ -47,13 +47,19 @@ export function ConfidenceMeter({ value, onChange }: ConfidenceMeterProps) {
           </TooltipTrigger>
           <TooltipContent side="right" className="max-w-sm p-4 bg-popover border border-border shadow-elevated z-50">
             <p className="text-sm leading-relaxed">
-              Matching confidence controls how sure we want to be that records belong to the same patient.
-              <br /><br />
-              <strong>Lower values</strong> include more patients but may have some uncertainty.
-              <br /><br />
-              <strong>Higher values</strong> are very accurate but may exclude usable data.
-              <br /><br />
-              We recommend <strong>0.80</strong> as it balances accuracy with data richness and works well for most analytical use cases.
+              Matching confidence represents how sure we want to be that records belong to the same patient.
+              
+
+
+              <strong> Lower confidence</strong> includes more patients and events but may introduce some uncertainty.
+              
+
+
+              <strong> Higher confidence</strong> ensures very accurate matches but may reduce patient coverage.
+              
+
+
+              We recommend <strong>80%</strong> as it balances reliability with data richness for most analytical use cases.
             </p>
           </TooltipContent>
         </Tooltip>
@@ -61,16 +67,16 @@ export function ConfidenceMeter({ value, onChange }: ConfidenceMeterProps) {
 
       <div className="bg-secondary/50 rounded-lg p-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-muted-foreground">0.65</span>
+          <span className="text-sm font-medium text-muted-foreground">65%</span>
           <div className="flex flex-col items-center">
-            <span className={cn('text-2xl font-bold tabular-nums', getConfidenceColor())}>
-              {value.toFixed(2)}
+            <span className={cn('text-2xl font-bold tabular-nums ml-8', getConfidenceColor())}>
+                {Math.round(value)}%
             </span>
-            <span className={cn('text-xs font-medium', getConfidenceColor())}>
-              {getConfidenceLabel()}
+            <span className={cn('text-xs font-medium ml-7', getConfidenceColor())}>
+                  {getConfidenceLabel()}
             </span>
           </div>
-          <span className="text-sm font-medium text-muted-foreground">1.00</span>
+          <span className="text-sm font-medium text-muted-foreground">100%</span>
         </div>
 
         <div className="relative mt-4">
@@ -86,7 +92,7 @@ export function ConfidenceMeter({ value, onChange }: ConfidenceMeterProps) {
           
           <Slider
             value={[confidenceToSlider(value)]}
-            onValueChange={(values) => onChange(sliderToConfidence(values[0]))}
+            onValueChange={(values) => onChange(Math.round(sliderToConfidence(values[0])))}
             max={100}
             step={1}
             className="relative z-10"
@@ -100,7 +106,7 @@ export function ConfidenceMeter({ value, onChange }: ConfidenceMeterProps) {
             <span className="text-xs text-muted-foreground">Matching</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-xs font-medium text-primary">0.80</span>
+            <span className="text-xs font-medium text-primary">80%</span>
             <span className="text-xs text-muted-foreground">Recommended</span>
           </div>
           <div className="flex flex-col items-end">
@@ -112,3 +118,4 @@ export function ConfidenceMeter({ value, onChange }: ConfidenceMeterProps) {
     </div>
   );
 }
+ 

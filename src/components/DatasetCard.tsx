@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, Calendar, Users, Rows3, Stethoscope, FileText } from 'lucide-react';
+import { ChevronDown, Calendar, Users, Rows3, Stethoscope, FileText, TestTube, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DatasetInfo } from '@/types/triangulation';
 
@@ -21,6 +21,34 @@ export function DatasetCard({ dataset, isSelected, onSelect }: DatasetCardProps)
       onSelect();
     }
   };
+
+  // Get source-specific metric label and value
+  const getSourceSpecificMetric = () => {
+    if (dataset.sourceType === 'Claims' && dataset.claimsCount) {
+      return {
+        icon: FileText,
+        label: 'Claims Count',
+        value: dataset.claimsCount,
+      };
+    }
+    if (dataset.sourceType === 'Lab' && dataset.labRecords) {
+      return {
+        icon: TestTube,
+        label: 'Lab Records',
+        value: dataset.labRecords,
+      };
+    }
+    if (dataset.sourceType === 'SP' && dataset.shipments) {
+      return {
+        icon: Package,
+        label: 'Shipments',
+        value: dataset.shipments,
+      };
+    }
+    return null;
+  };
+
+  const sourceMetric = getSourceSpecificMetric();
 
   return (
     <div
@@ -91,7 +119,7 @@ export function DatasetCard({ dataset, isSelected, onSelect }: DatasetCardProps)
       {/* Expanded View */}
       {isExpanded && (
         <div className="px-5 pb-5 pt-0 border-t border-border/50 animate-fade-in">
-          <div className="pt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="pt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wide">
                 <Users className="h-3.5 w-3.5" />
@@ -106,13 +134,13 @@ export function DatasetCard({ dataset, isSelected, onSelect }: DatasetCardProps)
               </div>
               <p className="text-lg font-semibold text-foreground">{dataset.hcpCount}</p>
             </div>
-            {dataset.claimsCount && (
+            {sourceMetric && (
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wide">
-                  <FileText className="h-3.5 w-3.5" />
-                  Claims Count
+                  <sourceMetric.icon className="h-3.5 w-3.5" />
+                  {sourceMetric.label}
                 </div>
-                <p className="text-lg font-semibold text-foreground">{dataset.claimsCount}</p>
+                <p className="text-lg font-semibold text-foreground">{sourceMetric.value}</p>
               </div>
             )}
           </div>
@@ -121,3 +149,4 @@ export function DatasetCard({ dataset, isSelected, onSelect }: DatasetCardProps)
     </div>
   );
 }
+ 

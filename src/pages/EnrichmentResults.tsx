@@ -6,14 +6,53 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ConfidenceRecommendation } from '@/components/ConfidenceRecommendation';
 
 interface LocationState {
-  confidence?: number;
+  confidence?: number; // Now expects percentage (65-100)
+}
+
+// Dynamic KPI calculations based on confidence level
+function calculateKPIs(confidence: number) {
+  // Normalize confidence to 0-1 range for calculations (65-100 -> 0-1)
+  const normalizedConfidence = (confidence - 65) / 35;
+  
+  // Patients Enriched: Higher at lower confidence, lower at higher confidence
+  // Range: ~85% at 65% confidence down to ~55% at 100% confidence
+  const patientsEnriched = 85 - (normalizedConfidence * 30);
+  
+  // Multi-Source Coverage: Higher at lower confidence
+  // Range: ~72% at 65% confidence down to ~42% at 100% confidence
+  const multiSourceCoverage = 72 - (normalizedConfidence * 30);
+  
+  // Avg Match Confidence: Mirrors or slightly exceeds slider value
+  const avgMatchConfidence = Math.min(confidence + Math.round(Math.random() * 3), 100);
+  
+  // Avg Key Events per Patient - After value
+  // Lower confidence → higher events (5.2), Higher confidence → fewer events (3.4)
+  const eventsAfter = 5.2 - (normalizedConfidence * 1.8);
+  const eventsChange = Math.round(((eventsAfter - 2.1) / 2.1) * 100);
+  
+  // Median Journey Length - After value
+  // Lower confidence → longer journeys (52), Higher confidence → shorter (28)
+  const journeyAfter = Math.round(52 - (normalizedConfidence * 24));
+  const journeyChange = Math.round(((journeyAfter - 18) / 18) * 100);
+  
+  return {
+    patientsEnriched: patientsEnriched.toFixed(1),
+    multiSourceCoverage: multiSourceCoverage.toFixed(1),
+    avgMatchConfidence,
+    eventsAfter: eventsAfter.toFixed(1),
+    eventsChange,
+    journeyAfter,
+    journeyChange,
+  };
 }
 
 const EnrichmentResults = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState;
-  const confidence = state?.confidence ?? 0.80;
+  const confidence = state?.confidence ?? 80;
+
+  const kpis = calculateKPIs(confidence);
 
   const handleBack = () => {
     navigate('/triangulation');
@@ -59,7 +98,7 @@ const EnrichmentResults = () => {
                     </span>
                   </div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">Patients Enriched</p>
-                  <p className="text-4xl font-bold text-foreground tracking-tight">78.4%</p>
+                  <p className="text-4xl font-bold text-foreground tracking-tight">{kpis.patientsEnriched}%</p>
                   <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
                     Patients successfully linked to at least one additional data source
                   </p>
@@ -79,9 +118,9 @@ const EnrichmentResults = () => {
                     </span>
                   </div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">Multi-Source Coverage</p>
-                  <p className="text-4xl font-bold text-foreground tracking-tight">62.1%</p>
+                  <p className="text-4xl font-bold text-foreground tracking-tight">{kpis.multiSourceCoverage}%</p>
                   <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                    Patients with high-density, cross-source profiles from &gt;2 sources
+                    Patients with data from &gt;2 sources
                   </p>
                 </CardContent>
               </Card>
@@ -100,28 +139,22 @@ const EnrichmentResults = () => {
                   </div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">Avg Match Confidence Score</p>
                   <div className="flex items-baseline gap-2">
-                    <p className="text-4xl font-bold text-foreground tracking-tight">{confidence.toFixed(2)}</p>
+                    <p className="text-4xl font-bold text-foreground tracking-tight">{kpis.avgMatchConfidence}%</p>
                     <span className="text-sm font-medium text-success">High</span>
                   </div>
                   {/* Confidence Bar */}
                   <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-gradient-to-r from-accent to-success rounded-full transition-all duration-500"
-                      style={{ width: `${confidence * 100}%` }}
+                      style={{ width: `${kpis.avgMatchConfidence}%` }}
                     />
-                  </div>
+            </div>
                   <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                    Average confidence across all enriched patient matches
+                    Average confidence across all accepted patient matches
                   </p>
                 </CardContent>
               </Card>
             </div>
-          </section>
-
-          {/* Matching Confidence Recommendation */}
-          <section>
-            <h3 className="text-lg font-semibold text-foreground mb-4">Matching Confidence Recommendation</h3>
-            <ConfidenceRecommendation confidence={confidence} />
           </section>
 
           {/* Section 2: Before vs After Enrichment Cards */}
@@ -151,13 +184,13 @@ const EnrichmentResults = () => {
                       <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
                         <span className="text-success font-bold">→</span>
                       </div>
-                      <span className="text-xs font-medium text-success mt-1">+119%</span>
+                      <span className="text-xs font-medium text-success mt-1">+{kpis.eventsChange}%</span>
                     </div>
 
                     {/* After */}
                     <div className="flex-1 p-4 rounded-lg bg-success/5 border border-success/20">
                       <p className="text-xs font-medium text-success uppercase tracking-wide mb-1">After</p>
-                      <p className="text-3xl font-bold text-success">4.6</p>
+                      <p className="text-3xl font-bold text-success">{kpis.eventsAfter}</p>
                       <p className="text-xs text-muted-foreground mt-1">Triangulated</p>
                     </div>
                   </div>
@@ -191,13 +224,13 @@ const EnrichmentResults = () => {
                       <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
                         <span className="text-success font-bold">→</span>
                       </div>
-                      <span className="text-xs font-medium text-success mt-1">+133%</span>
+                      <span className="text-xs font-medium text-success mt-1">+{kpis.journeyChange}%</span>
                     </div>
 
                     {/* After */}
                     <div className="flex-1 p-4 rounded-lg bg-success/5 border border-success/20">
                       <p className="text-xs font-medium text-success uppercase tracking-wide mb-1">After</p>
-                      <p className="text-3xl font-bold text-success">42</p>
+                      <p className="text-3xl font-bold text-success">{kpis.journeyAfter}</p>
                       <p className="text-xs text-muted-foreground mt-1">months</p>
                     </div>
                   </div>
@@ -208,6 +241,12 @@ const EnrichmentResults = () => {
                 </CardContent>
               </Card>
             </div>
+          </section>
+
+          {/* Matching Confidence Recommendation */}
+          <section>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Matching Confidence Recommendation</h3>
+            <ConfidenceRecommendation confidence={confidence} />
           </section>
 
           {/* Action Section */}
@@ -235,3 +274,4 @@ const EnrichmentResults = () => {
 };
 
 export default EnrichmentResults;
+ 

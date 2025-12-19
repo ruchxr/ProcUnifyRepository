@@ -8,7 +8,10 @@ export interface DatasetInfo {
   // Additional stats for expanded view
   patientCount: string;
   hcpCount: string;
-  claimsCount?: string; // Only shown for Claims type
+  // Source-type specific fields
+  claimsCount?: string; // Only for Claims type
+  labRecords?: string; // Only for Lab type
+  shipments?: string; // Only for SP type
 }
 
 export type AgeMatchingOption = 'exact' | 'plus_minus_1' | 'plus_minus_2';
@@ -74,19 +77,43 @@ export function generateMockDatasets(sources: { type: string | null; vendor: str
   const patientCounts = ['12.4M', '8.7M', '15.2M', '5.3M'];
   const hcpCounts = ['1.2M', '890K', '1.5M', '420K'];
   const rowCounts = ['85M', '52M', '120M', '38M'];
-  const claimsCounts = ['245M', '180M', '320M', '95M'];
+  const claimsCounts = ['68M', '42M', '96M', '30M']; // Less than total rows
+  const labRecordsCounts = ['85M', '52M', '120M', '38M']; // Equal to total rows
+  const shipmentsCounts = ['12.8M', '7.8M', '18M', '5.7M']; // ~15% of total rows
 
   return sources
     .filter((s) => s.type && s.vendor)
-    .map((source, index) => ({
-      id: `dataset-${index}`,
-      name: `${source.vendor} ${source.type} Dataset`,
-      sourceType: source.type!,
-      vendor: source.vendor!,
-      timeCoverage: timeRanges[index % timeRanges.length],
-      patientCount: patientCounts[index % patientCounts.length],
-      hcpCount: hcpCounts[index % hcpCounts.length],
-      rowCount: rowCounts[index % rowCounts.length],
-      claimsCount: source.type === 'Claims' ? claimsCounts[index % claimsCounts.length] : undefined,
-    }));
+    .map((source, index) => {
+      const baseDataset = {
+        id: `dataset-${index}`,
+        name: `${source.vendor} ${source.type} Dataset`,
+        sourceType: source.type!,
+        vendor: source.vendor!,
+        timeCoverage: timeRanges[index % timeRanges.length],
+        patientCount: patientCounts[index % patientCounts.length],
+        hcpCount: hcpCounts[index % hcpCounts.length],
+        rowCount: rowCounts[index % rowCounts.length],
+      };
+
+      // Add source-type specific fields
+      if (source.type === 'Claims') {
+        return {
+          ...baseDataset,
+          claimsCount: claimsCounts[index % claimsCounts.length],
+        };
+      } else if (source.type === 'Lab') {
+        return {
+          ...baseDataset,
+          labRecords: labRecordsCounts[index % labRecordsCounts.length],
+        };
+      } else if (source.type === 'SP') {
+        return {
+          ...baseDataset,
+          shipments: shipmentsCounts[index % shipmentsCounts.length],
+        };
+      }
+      
+      return baseDataset;
+    });
 }
+ 

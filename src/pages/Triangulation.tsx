@@ -25,7 +25,7 @@ const Triangulation = () => {
 
   const [datasets, setDatasets] = useState<DatasetInfo[]>([]);
   const [baseDatasetId, setBaseDatasetId] = useState<string | null>(null);
-  const [confidenceLevel, setConfidenceLevel] = useState(0.80);
+  const [confidenceLevel, setConfidenceLevel] = useState(80);
   const [attributeConfigs, setAttributeConfigs] = useState<AttributeConfig[]>(
     DEFAULT_ATTRIBUTE_CONFIGS
   );
@@ -103,7 +103,7 @@ const Triangulation = () => {
             </div>
 
             <p className="text-sm text-muted-foreground mb-4">
-              Select one dataset as the <strong>Base Dataset</strong> for patient matching. The base dataset will serve as the primary reference for triangulation.
+              Select one dataset as the <strong>Base Dataset</strong> for patient matching. The base dataset will serve as the primary reference for unification.
             </p>
 
             <div className="space-y-3">
@@ -161,7 +161,7 @@ const Triangulation = () => {
               className="gap-2"
             >
               <Play className="h-4 w-4" />
-              Start Patient Triangulation
+              Start Patient Unification
             </Button>
           </div>
         </div>
@@ -171,3 +171,5 @@ const Triangulation = () => {
 };
 
 export default Triangulation;
+
+ 
