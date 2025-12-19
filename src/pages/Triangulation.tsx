@@ -25,7 +25,7 @@ const Triangulation = () => {
 
   const [datasets, setDatasets] = useState<DatasetInfo[]>([]);
   const [baseDatasetId, setBaseDatasetId] = useState<string | null>(null);
-  const [confidenceLevel, setConfidenceLevel] = useState(50);
+  const [confidenceLevel, setConfidenceLevel] = useState(0.80);
   const [attributeConfigs, setAttributeConfigs] = useState<AttributeConfig[]>(
     DEFAULT_ATTRIBUTE_CONFIGS
   );
@@ -46,20 +46,8 @@ const Triangulation = () => {
     );
   };
 
-  // Update attributes based on confidence level changes
   const handleConfidenceChange = (value: number) => {
     setConfidenceLevel(value);
-    
-    // Auto-adjust attribute strictness based on global confidence
-    if (value < 33) {
-      setAttributeConfigs((prev) =>
-        prev.map((attr) => ({ ...attr, strictness: 'broad' as const, ageRange: attr.id === 'age' ? 10 : attr.ageRange }))
-      );
-    } else if (value > 66) {
-      setAttributeConfigs((prev) =>
-        prev.map((attr) => ({ ...attr, strictness: 'strict' as const, ageRange: attr.id === 'age' ? 0 : attr.ageRange }))
-      );
-    }
   };
 
   const handleStartTriangulation = () => {
@@ -77,8 +65,8 @@ const Triangulation = () => {
       description: 'Patient matching process has been initiated.',
     });
 
-    // Navigate to results page
-    navigate('/results');
+    // Navigate to results page with confidence level
+    navigate('/results', { state: { confidence: confidenceLevel } });
   };
 
   const handleBack = () => {
@@ -97,7 +85,7 @@ const Triangulation = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h2 className="text-2xl font-bold text-foreground">Dataset Review & Triangulation Controls</h2>
+              <h2 className="text-2xl font-bold text-foreground">Dataset Review & Matching Configuration</h2>
               <p className="text-muted-foreground mt-1">
                 Configure matching parameters and select your base dataset
               </p>
